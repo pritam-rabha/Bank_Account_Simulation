@@ -15,7 +15,7 @@ A Flask web application that simulates savings, current and fixed-deposit accoun
 
 | Field | Details |
 |---|---|
-| Application | BankSim — Bank Account Simulation |
+| Application | [BankSim](https://banksim-5hmn.onrender.com/)|
 | Author | Pritam Rabha |
 | Programme | MCA, 3rd Semester |
 | Course | Python Programming |
