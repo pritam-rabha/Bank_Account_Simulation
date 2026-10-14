@@ -1,0 +1,164 @@
+{# ---- icons: 24px stroke set (hand-drawn paths, no external icon font) ---- #}
+{% macro icon(name, cls='') -%}
+<svg class="ico {{ cls }}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+{%- if name == 'dashboard' %}<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>
+{%- elif name == 'account' %}<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3 10h18M7 15h4"/>
+{%- elif name == 'deposit' %}<path d="M12 3v12m0 0-4-4m4 4 4-4M4 21h16"/>
+{%- elif name == 'withdraw' %}<path d="M12 17V5m0 0L8 9m4-4 4 4M4 21h16"/>
+{%- elif name == 'transfer' %}<path d="M4 8h14m0 0-3-3m3 3-3 3M20 16H6m0 0 3-3m-3 3 3 3"/>
+{%- elif name == 'interest' %}<path d="M19 5 5 19"/><circle cx="7" cy="7" r="2.2"/><circle cx="17" cy="17" r="2.2"/>
+{%- elif name == 'history' %}<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/>
+{%- elif name == 'export' %}<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 11v6m-3-3 3 3 3-3"/>
+{%- elif name == 'settings' %}<path d="M4 7h9m4 0h3M4 17h3m4 0h9M4 12h13m4 0h-.01"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/><circle cx="19" cy="12" r="0.6"/>
+{%- elif name == 'calculator' %}<rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8.5 7.5h7M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 16h.01M12 16h.01M15.5 16h.01"/>
+{%- elif name == 'info' %}<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>
+{%- elif name == 'logout' %}<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+{%- elif name == 'menu' %}<path d="M4 6h16M4 12h16M4 18h16"/>
+{%- elif name == 'shield' %}<path d="M12 3 4.5 6v5.5c0 4.6 3.2 7.9 7.5 9.5 4.3-1.6 7.5-4.9 7.5-9.5V6z"/><path d="m9 12 2.2 2.2L15.5 10"/>
+{%- elif name == 'lock' %}<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>
+{%- elif name == 'layers' %}<path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/>
+{%- elif name == 'check' %}<path d="m5 12.5 4.5 4.5L19 7.5"/>
+{%- elif name == 'arrow-in' %}<path d="M7 7l10 10m0 0V9m0 8H9"/>
+{%- elif name == 'arrow-out' %}<path d="M17 7 7 17m0 0h8m-8 0V9"/>
+{%- elif name == 'chevron' %}<path d="m9 6 6 6-6 6"/>
+{%- elif name == 'alert' %}<path d="M12 4 2.8 19.5h18.4z"/><path d="M12 10v4.5M12 17.2h.01"/>
+{%- elif name == 'inbox' %}<path d="M3 13l2.5-7.5A2 2 0 0 1 7.4 4h9.2a2 2 0 0 1 1.9 1.5L21 13v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 13h5l1.5 2.5h5L16 13h5"/>
+{%- endif -%}
+</svg>
+{%- endmacro %}
+
+{% macro csrf() %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endmacro %}
+
+{% macro idem(form) %}<input type="hidden" name="idempotency_key" value="{{ (form.idempotency_key if form and form.idempotency_key) or new_idem_key() }}">{% endmacro %}
+
+{% macro flashes() %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for category, message in messages %}
+    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+      {{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {% endfor %}
+{% endwith %}
+{% endmacro %}
+
+{# Page header. Use {% call head(...) %}action buttons{% endcall %} for the right-hand actions. #}
+{% macro head(title, sub='') %}
+<div class="page-head">
+  <div><h1>{{ title }}</h1>{% if sub %}<p class="sub">{{ sub }}</p>{% endif %}</div>
+  {% if caller %}<div class="page-actions">{{ caller() }}</div>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro form_error(errors, key='_form') %}
+{% if errors and errors.get(key) %}<div class="alert alert-danger callout" role="alert">{{ icon('alert') }}<p>{{ errors[key] }}</p></div>{% endif %}
+{% endmacro %}
+
+{# Accessible text input. `extra` is template-authored markup only (never user data). #}
+{% macro field(name, label, errors, value='', type='text', help='', inputmode='', autocomplete='off', required=true, extra='') %}
+<div class="mb-3">
+  <label for="{{ name }}" class="form-label">{{ label }}{% if required %} <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden">(required)</span>{% endif %}</label>
+  <input type="{{ type }}" class="form-control{% if errors and errors.get(name) %} is-invalid{% endif %}" id="{{ name }}" name="{{ name }}"
+         {% if type != 'password' %}value="{{ value }}"{% endif %}
+         {% if inputmode %}inputmode="{{ inputmode }}"{% endif %} autocomplete="{{ autocomplete }}"
+         {% if required %}required{% endif %}
+         aria-describedby="{% if help %}{{ name }}-help{% endif %}{% if errors and errors.get(name) %} {{ name }}-error{% endif %}"
+         {% if errors and errors.get(name) %}aria-invalid="true"{% endif %} {{ extra|safe }}>
+  {% if help %}<div id="{{ name }}-help" class="form-text">{{ help }}</div>{% endif %}
+  {% if errors and errors.get(name) %}<div id="{{ name }}-error" class="invalid-feedback" role="alert">{{ errors[name] }}</div>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro money_field(name, label, errors, value='', help='') %}
+<div class="mb-3">
+  <label for="{{ name }}" class="form-label">{{ label }} <span class="text-danger" aria-hidden="true">*</span><span class="visually-hidden">(required)</span></label>
+  <div class="input-group">
+    <span class="input-group-text" aria-hidden="true">{{ cfg.CURRENCY_SYMBOL }}</span>
+    <input type="text" class="form-control num{% if errors and errors.get(name) %} is-invalid{% endif %}" id="{{ name }}" name="{{ name }}" value="{{ value }}"
+           inputmode="decimal" autocomplete="off" required placeholder="0.00" pattern="[0-9]+(\.[0-9]{1,2})?" data-money
+           aria-describedby="{% if help %}{{ name }}-help{% endif %}{% if errors and errors.get(name) %} {{ name }}-error{% endif %}"
+           {% if errors and errors.get(name) %}aria-invalid="true"{% endif %}>
+  </div>
+  {% if help %}<div id="{{ name }}-help" class="form-text">{{ help }}</div>{% endif %}
+  {% if errors and errors.get(name) %}<div id="{{ name }}-error" class="invalid-feedback" role="alert">{{ errors[name] }}</div>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro pin_field(name, label, errors, help='', new=false) %}
+{{ field(name, label, errors, '', 'password', help, 'numeric', 'new-password' if new else 'current-password', true, 'pattern="[0-9]*" minlength="' ~ cfg.PIN_MIN_LENGTH ~ '" maxlength="' ~ cfg.PIN_MAX_LENGTH ~ '" data-pin') }}
+{% endmacro %}
+
+{% macro submit(label, cls='btn-primary', full=false) %}
+<button type="submit" class="btn {{ cls }}{{ ' w-100' if full }}" data-once><span class="btn-label">{{ label }}</span><span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span></button>
+{% endmacro %}
+
+{% macro status_pill(account) %}
+<span class="pill {{ 'pill-pos' if account.status == 'ACTIVE' else 'pill-muted' }}">{{ account.status|title }}</span>
+{% endmacro %}
+
+{# ---- ledger ---- #}
+{% macro txn_table(items, empty_text='No transactions to show.') %}
+{% if items %}
+<div class="table-scroll">
+  <table class="ledger">
+    <caption class="visually-hidden">Transactions with amount and balances, most recent first unless sorted otherwise</caption>
+    <thead>
+      <tr>
+        <th scope="col">Date &amp; time</th><th scope="col">Details</th><th scope="col">Transaction / reference</th>
+        <th scope="col" class="r">Amount</th><th scope="col" class="r">Previous</th><th scope="col" class="r">Balance</th><th scope="col">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for t in items %}
+      {% set credit = t.direction == 'CREDIT' %}
+      <tr>
+        <td class="when"><time datetime="{{ t.timestamp }}"><span class="d">{{ (t.timestamp|dt).rsplit(',', 1)[0] }}</span><br><span class="t">{{ (t.timestamp|dt).rsplit(',', 1)[1]|trim }}</span></time></td>
+        <td>
+          <div class="what">
+            <span class="dir {{ 'dir-in' if credit else 'dir-out' }}">{{ icon('arrow-in' if credit else 'arrow-out') }}</span>
+            <div><div class="main">{{ t.description }}</div>
+              <div class="sub">{{ t.type|txn_label }}{% if t.counterparty %} · {{ 'from' if credit else 'to' }} {{ t.counterparty|mask }}{% endif %}</div></div>
+          </div>
+        </td>
+        <td class="refs"><span class="mono">{{ t.transaction_id }}</span><span class="mono">{{ t.reference }}</span></td>
+        <td class="amt {{ 'pos' if credit else 'neg' }}"><span class="visually-hidden">{{ 'Credit' if credit else 'Debit' }} </span>{{ '+' if credit else '−' }}{{ t.amount|money }}</td>
+        <td class="prev">{{ t.previous_balance|money }}</td>
+        <td class="bal">{{ t.new_balance|money }}</td>
+        <td><span class="pill pill-pos">{{ t.status|title }}</span></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty" role="status">
+  <div class="ring">{{ icon('inbox', 'ico-lg') }}</div>
+  <h3>{{ empty_text }}</h3>
+  <p>Transactions appear here once money moves in or out of the account.</p>
+</div>
+{% endif %}
+{% endmacro %}
+
+{% macro pager(p, endpoint, account_number, args) %}
+{% if p.pages > 1 %}
+<nav aria-label="Transaction pages">
+  <ul class="pagination mb-0">
+    <li class="page-item {{ '' if p.has_prev else 'disabled' }}"><a class="page-link" href="{{ url_for(endpoint, account_number=account_number, page=p.page-1, **args) }}" {% if not p.has_prev %}tabindex="-1" aria-disabled="true"{% endif %}>Previous</a></li>
+    <li class="page-item disabled"><span class="page-link">Page {{ p.page }} of {{ p.pages }}</span></li>
+    <li class="page-item {{ '' if p.has_next else 'disabled' }}"><a class="page-link" href="{{ url_for(endpoint, account_number=account_number, page=p.page+1, **args) }}" {% if not p.has_next %}tabindex="-1" aria-disabled="true"{% endif %}>Next</a></li>
+  </ul>
+</nav>
+{% endif %}
+{% endmacro %}
+
+{# ---- balance chart (data prepared in routes.build_chart) ---- #}
+{% macro balance_chart(c) %}
+<svg class="chart" viewBox="0 0 {{ c.w }} {{ c.h }}" role="img" aria-label="{{ c.aria }}">
+  <g class="grid">{% for g in c.grid %}<line x1="{{ c.left }}" x2="{{ c.w - c.right }}" y1="{{ g.y }}" y2="{{ g.y }}"/>{% endfor %}</g>
+  {% for g in c.grid %}<text x="{{ c.left - 10 }}" y="{{ g.y + 4 }}" text-anchor="end">{{ g.label }}</text>{% endfor %}
+  <path class="area" d="{{ c.area }}"/>
+  <path class="line" d="{{ c.path }}"/>
+  {% for d in c.dots %}<circle class="dot" cx="{{ d.x }}" cy="{{ d.y }}" r="3.5"/>{% endfor %}
+  <text x="{{ c.left }}" y="{{ c.h - 6 }}" text-anchor="start">{{ c.x_first }}</text>
+  <text x="{{ c.w - c.right }}" y="{{ c.h - 6 }}" text-anchor="end">{{ c.x_last }}</text>
+</svg>
+{% endmacro %}

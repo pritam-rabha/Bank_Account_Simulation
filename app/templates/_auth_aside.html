@@ -1,0 +1,15 @@
+{% from "_macros.html" import icon with context %}
+<aside class="auth-aside">
+  <a class="brand" href="{{ url_for('bank.home') }}">
+    <span class="brand-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10 12 4l8 6M6 10v8m4-8v8m4-8v8m4-8v8M4 20h16"/></svg></span>
+    <span>BankSim</span>
+  </a>
+  <div>
+    <h2>Practise how money software really works.</h2>
+    <ul class="auth-points">
+      <li>{{ icon('lock') }}<span><strong>Hashed PINs, lockout on repeated failures</strong>Scrypt hashing, CSRF protection and signed sessions.</span></li>
+      <li>{{ icon('transfer') }}<span><strong>Transfers that succeed or fail together</strong>The debit and the credit are committed as one unit.</span></li>
+      <li>{{ icon('layers') }}<span><strong>A complete, timestamped ledger</strong>Every successful transaction, filterable and exportable.</span></li>
+    </ul>
+  </div>
+</aside>

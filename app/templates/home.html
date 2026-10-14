@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon with context %}
+{% block title %}Bank account simulation{% endblock %}
+{% block content %}
+<section class="landing row g-4 align-items-center pb-5" aria-labelledby="hero-title">
+  <div class="col-lg-6">
+    <h1 id="hero-title">A bank account simulation, engineered like the real thing.</h1>
+    <p class="lead">Open simulated savings, current and fixed-deposit accounts, move fictional money between them, earn interest and inspect a complete ledger — with PIN login, all-or-nothing transfers and statement export.</p>
+    <div class="d-flex flex-wrap gap-2 mt-4">
+      {% if current_account %}
+        <a class="btn btn-primary btn-lg" href="{{ url_for('bank.dashboard') }}">Go to dashboard</a>
+      {% else %}
+        <a class="btn btn-primary btn-lg" href="{{ url_for('bank.register') }}">Open a demo account</a>
+        <a class="btn btn-outline-secondary btn-lg" href="{{ url_for('bank.login') }}">PIN login</a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-lg-6" aria-hidden="true">
+    <div class="preview">
+      <div class="preview-top"><i></i><i></i><i></i><span class="ms-2">Sample data — not a real account</span></div>
+      <div class="panel-body">
+        <div class="balance-label">Available balance</div>
+        <div class="balance"><span class="cur">₹</span>1,24,860.50</div>
+        <div class="balance-meta"><span>Savings Account</span><span class="mono">XXXXXXXX0012</span><span class="pill pill-pos">Active</span></div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="k">Money in</div><div class="v amount-pos">₹32,000.00</div></div>
+        <div class="metric"><div class="k">Money out</div><div class="v amount-neg">₹9,450.00</div></div>
+        <div class="metric"><div class="k">Transactions</div><div class="v">18</div></div>
+      </div>
+      <div class="table-scroll"><table class="ledger">
+        <tbody>
+          <tr><td><div class="what"><span class="dir dir-in">{{ icon('arrow-in') }}</span><div><div class="main">Salary credit</div><div class="sub">Deposit</div></div></div></td><td class="amt pos">+₹32,000.00</td></tr>
+          <tr><td><div class="what"><span class="dir dir-out">{{ icon('arrow-out') }}</span><div><div class="main">Transfer to XXXXXXXX0028</div><div class="sub">Transfer sent</div></div></div></td><td class="amt neg">−₹2,000.00</td></tr>
+          <tr><td><div class="what"><span class="dir dir-in">{{ icon('arrow-in') }}</span><div><div class="main">Simple interest 4.00% p.a.</div><div class="sub">Interest credited</div></div></div></td><td class="amt pos">+₹265.00</td></tr>
+        </tbody></table></div>
+    </div>
+  </div>
+</section>
+
+<section class="row g-4 py-4" aria-labelledby="how-title">
+  <div class="col-lg-5">
+    <h2 id="how-title" class="h4">How it works</h2>
+    <ol class="steps mt-3">
+      <li><div><strong>Open an account</strong><span>Choose a type and a PIN. Your PIN is stored only as a salted hash.</span></div></li>
+      <li><div><strong>Move fictional money</strong><span>Deposit, withdraw or transfer. Every successful action is written to the ledger with a timestamp.</span></div></li>
+      <li><div><strong>Review and export</strong><span>Filter your history, estimate interest and download a CSV statement.</span></div></li>
+    </ol>
+  </div>
+  <div class="col-lg-7">
+    <h2 class="h4">Account types</h2>
+    <div class="panel mt-3"><div class="table-scroll">
+      <table class="spec-table">
+        <thead><tr><th scope="col"></th>{% for rule in type_rules.values() %}<th scope="col">{{ rule.label.replace(' Account', '') }}</th>{% endfor %}</tr></thead>
+        <tbody>
+          <tr><th scope="row">Min. opening</th>{% for rule in type_rules.values() %}<td class="num">{{ rule.min_opening_deposit|money }}</td>{% endfor %}</tr>
+          <tr><th scope="row">Min. balance</th>{% for rule in type_rules.values() %}<td class="num">{{ rule.min_balance|money if rule.min_balance else '—' }}</td>{% endfor %}</tr>
+          <tr><th scope="row">Interest</th><td>{{ type_rules.SAVINGS.default_rate }}% p.a.</td><td>{{ type_rules.CURRENT.default_rate }}%</td><td>By term</td></tr>
+          <tr><th scope="row">Deposits in</th><td>Yes</td><td>Yes</td><td>No</td></tr>
+          <tr><th scope="row">Withdrawals</th><td>Above minimum</td><td>Yes</td><td>After maturity</td></tr>
+        </tbody>
+      </table>
+    </div></div>
+  </div>
+</section>
+
+{% endblock %}

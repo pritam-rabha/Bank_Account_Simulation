@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% from "_macros.html" import head, txn_table, pager, icon with context %}
+{% block title %}Transactions{% endblock %}
+{% block content %}
+{% set a = account.account_number %}
+{% call head('Transactions', 'Complete history for account ' ~ a ~ '. Times are shown in ' ~ cfg.DISPLAY_TIMEZONE ~ '.') %}
+  <a class="btn btn-outline-secondary" href="{{ url_for('bank.export', account_number=a, format='csv', **args) }}">{{ icon('export') }}Export CSV</a>
+{% endcall %}
+{% if errors %}<div class="alert alert-danger" role="alert"><p class="mb-1 fw-semibold">Please fix the filters:</p><ul class="mb-0">{% for m in errors.values() %}<li>{{ m }}</li>{% endfor %}</ul></div>{% endif %}
+<section class="panel">
+  <form method="get" class="filter-bar" aria-label="Filter transactions">
+    <div class="f"><label for="type">Type</label>
+      <select id="type" name="type" class="form-select">
+        <option value="">All types</option>
+        {% for code, label in txn_types.items() %}<option value="{{ code }}" {{ 'selected' if filters.get('type') == code }}>{{ label }}</option>{% endfor %}
+      </select></div>
+    <div class="f"><label for="date_from">From date</label>
+      <input id="date_from" name="date_from" type="date" class="form-control{% if errors.get('date_from') %} is-invalid{% endif %}" value="{{ filters.get('date_from','') }}"></div>
+    <div class="f"><label for="date_to">To date</label>
+      <input id="date_to" name="date_to" type="date" class="form-control{% if errors.get('date_to') %} is-invalid{% endif %}" value="{{ filters.get('date_to','') }}"></div>
+    <div class="f"><label for="sort">Order</label>
+      <select id="sort" name="sort" class="form-select">
+        <option value="newest" {{ 'selected' if sort == 'newest' }}>Newest first</option>
+        <option value="oldest" {{ 'selected' if sort == 'oldest' }}>Oldest first</option>
+      </select></div>
+    <div class="actions"><button class="btn btn-primary" type="submit">Apply</button><a class="btn btn-outline-secondary" href="{{ url_for('bank.transactions', account_number=a) }}">Reset</a></div>
+  </form>
+  <div class="panel-head border-top"><h2 class="panel-title">Results</h2><span class="text-muted small">{{ page_data.total }} transaction{{ '' if page_data.total == 1 else 's' }} found</span></div>
+  {{ txn_table(page_data['items'], 'No transactions match these filters.') }}
+  {% if page_data.pages > 1 %}<div class="pager-bar"><span>Showing {{ (page_data.page - 1) * page_data.per_page + 1 }}–{{ (page_data.page - 1) * page_data.per_page + page_data['items']|length }} of {{ page_data.total }}</span>{{ pager(page_data, 'bank.transactions', a, args) }}</div>{% endif %}
+</section>
+{% endblock %}

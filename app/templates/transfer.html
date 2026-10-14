@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% from "_macros.html" import head, csrf, idem, money_field, field, pin_field, form_error, submit, icon with context %}
+{% block title %}Fund transfer{% endblock %}
+{% block content %}
+{% call head('Fund transfer', 'Send simulated money to another BankSim account. The debit and the credit are saved together, or not at all.') %}{% endcall %}
+{% if account.status != 'ACTIVE' %}<div class="alert alert-warning callout" role="alert">{{ icon('alert') }}<p>This account is closed; transfers are not possible.</p></div>{% endif %}
+<div class="row g-4">
+  <div class="col-lg-7">
+    <section class="panel">
+      <div class="panel-body">
+        {{ form_error(errors) }}
+        <form method="post" data-confirm="Send this transfer? This cannot be undone." novalidate>
+          {{ csrf() }}{{ idem(form) }}
+          <div class="form-section">
+            <h2>From</h2>
+            <label for="source" class="visually-hidden">Source account</label>
+            <input id="source" class="form-control" value="{{ account.holder_name }} · {{ account.account_number }}" readonly aria-readonly="true">
+            <div class="form-text">You are signed in as the holder of this account, so it is the only possible source.</div>
+          </div>
+          <div class="form-section">
+            <h2>To</h2>
+            {{ field('destination_account', 'Destination account number', errors, form.destination_account, inputmode='numeric', extra='maxlength="12" pattern="[0-9]{12}"', help='12-digit number of another open account that accepts deposits (not a fixed deposit).') }}
+            {{ money_field('amount', 'Amount', errors, form.amount, 'Must not exceed your available balance.') }}
+            {{ field('description', 'Reference note (optional)', errors, form.description, required=false, extra='maxlength="60"') }}
+          </div>
+          <div class="form-section">
+            <h2>Authorise</h2>
+            {{ pin_field('pin', 'Confirm with your PIN', errors, 'Re-entering your PIN authorises this transfer.') }}
+          </div>
+          <div class="d-flex gap-2">{{ submit('Send transfer') }}<a class="btn btn-outline-secondary" href="{{ url_for('bank.dashboard') }}">Cancel</a></div>
+        </form>
+      </div>
+    </section>
+  </div>
+  <div class="col-lg-5">{% set side_note = 'Both ledger entries are committed in a single all-or-nothing step, so money can never be taken from one account without reaching the other.' %}{% include "_side_summary.html" %}</div>
+</div>
+{% endblock %}

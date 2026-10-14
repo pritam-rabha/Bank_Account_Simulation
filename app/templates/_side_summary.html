@@ -1,0 +1,17 @@
+{# Right-hand context panel for payment forms. Needs: account #}
+{% from "_macros.html" import status_pill with context %}
+{% set f = funds(account) %}
+<aside class="panel" aria-label="Account summary">
+  <div class="panel-head"><h2 class="panel-title">Account summary</h2>{{ status_pill(account) }}</div>
+  <div class="kv-panel">
+    <dl class="kv">
+      <dt>Account</dt><dd>{{ f.rule.label }}</dd>
+      <dt>Number</dt><dd class="mono">{{ account.account_number }}</dd>
+      <dt>Balance</dt><dd class="num fw-semibold">{{ account.balance|money }}</dd>
+      <dt>Available to take out</dt><dd class="num">{% if f.locked %}<span class="pill pill-warn">Locked until maturity</span>{% else %}{{ f.available|money }}{% endif %}</dd>
+      {% if f.min_balance %}<dt>Minimum balance</dt><dd class="num">{{ f.min_balance|money }}</dd>{% endif %}
+      <dt>Per-transaction limit</dt><dd class="num">{{ cfg.MAX_TRANSACTION_AMOUNT|money }}</dd>
+    </dl>
+  </div>
+  <div class="panel-foot text-muted">{{ side_note or 'Overdrafts are never allowed. Failed operations never change your balance.' }}</div>
+</aside>

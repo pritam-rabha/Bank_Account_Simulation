@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% from "_macros.html" import head, icon with context %}
+{% block title %}About the project{% endblock %}
+{% block content %}
+{% call head('About BankSim', 'Bank Account Simulation — an MCA Python Programming project.') %}{% endcall %}
+
+<div class="alert alert-warning callout" role="note">{{ icon('alert') }}<p><strong>Educational simulation.</strong> Everything here is fictional. The account rules, interest rates and security model are teaching models. They are <strong>not</strong> real banking products, do not follow any banking regulation, and BankSim is not connected to or affiliated with any bank or payment service.</p></div>
+
+<div class="row g-4 mb-4">
+  <div class="col-lg-8"><section class="panel h-100">
+    <div class="panel-head"><h2 class="panel-title">Project information</h2></div>
+    <div class="kv-panel"><dl class="kv">
+      <dt>Application</dt><dd>BankSim — Bank Account Simulation</dd>
+      <dt>Author</dt><dd>Pritam Rabha</dd>
+      <dt>Programme</dt><dd>MCA, 3rd Semester</dd>
+      <dt>Course</dt><dd>Python Programming</dd>
+      <dt>Project guide</dt><dd>Dr. Pangambam Sendash Singh</dd>
+      <dt>Institution</dt><dd>Dr. Hari Singh Gour Vishwavidyalaya, Sagar, Madhya Pradesh</dd>
+    </dl></div>
+  </section></div>
+</div>
+
+<h2 class="h5 mb-3">Account-type rules</h2>
+<div class="row g-4 mb-4">
+  {% for rule in type_rules.values() %}
+  <div class="col-lg-4"><section class="panel h-100">
+    <div class="panel-head"><h3 class="panel-title">{{ rule.label }}</h3></div>
+    <div class="panel-body"><ul class="rule-list">{% for r in rule.rules %}<li>{{ r }}</li>{% endfor %}</ul></div>
+  </section></div>
+  {% endfor %}
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6"><section class="panel h-100">
+    <div class="panel-head"><h2 class="panel-title">Interest: simple or compound?</h2></div>
+    <div class="panel-body"><ul class="rule-list">
+      <li>The <strong>calculator</strong> offers both. Simple: <code>I = P×R×T÷100</code>. Compound: <code>A = P×(1+R÷(100n))^(nT)</code>.</li>
+      <li><strong>Interest credited to accounts</strong> is always <em>simple</em> interest: savings interest on the current balance for 1–12 months chosen by the user (a simulated time step); fixed deposits receive simple interest for the whole term once, after maturity.</li>
+      <li>Assumptions: 12 equal months per year, constant rate, no tax or fees, final figure rounded half-up to 0.01.</li>
+    </ul></div>
+  </section></div>
+  <div class="col-lg-6"><section class="panel h-100">
+    <div class="panel-head"><h2 class="panel-title">Security model (educational)</h2></div>
+    <div class="panel-body"><ul class="rule-list">
+      <li>PINs are hashed with salted <code>scrypt</code>; hashes are never displayed or returned by any page or API.</li>
+      <li>After repeated failures the account (and the client IP) is locked for a period; counters persist across restarts.</li>
+      <li>State-changing requests need a CSRF token; session cookies are signed, <code>HttpOnly</code>, <code>SameSite=Lax</code> and expire after inactivity.</li>
+      <li>Changing the account number in a URL returns <em>403 Forbidden</em>: you can only see your own account and records.</li>
+      <li><strong>A short numeric PIN alone is not adequate protection for a real internet-facing financial service.</strong> Real systems add strong credentials, multi-factor authentication, device and risk checks, monitoring and regulatory compliance.</li>
+    </ul></div>
+  </section></div>
+</div>
+
+<section class="panel mt-4">
+  <div class="panel-head"><h2 class="panel-title">Limitations of JSON storage</h2></div>
+  <div class="panel-body"><ul class="rule-list">
+    <li>The whole file is read and rewritten on each change — fine for a demo, not for scale.</li>
+    <li>Atomicity is provided by a lock plus an atomic file replacement, so a transfer is all-or-nothing on a single host. It does not offer a write-ahead log, replication or point-in-time recovery (only one <code>.bak</code> copy).</li>
+    <li>It assumes one machine with a normal local filesystem. Do not share the file over a network drive, and note that free cloud hosts (such as Render’s free tier) may erase local files on restart or redeploy.</li>
+    <li>For a real system a transactional database (for example PostgreSQL) is the right choice.</li>
+  </ul></div>
+</section>
+{% endblock %}

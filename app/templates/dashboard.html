@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% from "_macros.html" import head, txn_table, status_pill, icon, balance_chart with context %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+{% set a = account.account_number %}
+{% call head('Hello, ' ~ account.holder_name.split(' ')[0], 'A summary of your simulated account and its latest activity.') %}
+  <a class="btn btn-outline-secondary" href="{{ url_for('bank.deposit', account_number=a) }}">{{ icon('deposit') }}Deposit</a>
+  <a class="btn btn-primary" href="{{ url_for('bank.transfer', account_number=a) }}">{{ icon('transfer') }}Transfer funds</a>
+{% endcall %}
+{% if account.status != 'ACTIVE' %}
+<div class="alert alert-warning callout" role="alert">{{ icon('alert') }}<p>This account is closed. You can still view and export its history, but no money can move.</p></div>
+{% endif %}
+
+<div class="row g-4">
+  <div class="col-xl-8">
+    <section class="panel" aria-label="Balance">
+      <div class="panel-body">
+        <div class="balance-label">Current balance</div>
+        <div class="balance"><span class="cur">{{ cfg.CURRENCY_SYMBOL }}</span>{{ account.balance|money|replace(cfg.CURRENCY_SYMBOL, '') }}</div>
+        <div class="balance-meta">
+          <span>{{ rule.label }}</span><span class="mono">{{ a }}</span>{{ status_pill(account) }}
+        </div>
+      </div>
+      <div class="metrics">
+        <div class="metric"><div class="k">Money in · 30 days</div><div class="v {{ 'amount-pos' if money_in > 0 else 'amount-zero' }}">{{ money_in|money }}</div></div>
+        <div class="metric"><div class="k">Money out · 30 days</div><div class="v {{ 'amount-neg' if money_out > 0 else 'amount-zero' }}">{{ money_out|money }}</div></div>
+        <div class="metric"><div class="k">Available to take out</div><div class="v">{% if funds.locked %}<span class="pill pill-warn">Locked</span>{% else %}{{ funds.available|money }}{% endif %}</div></div>
+      </div>
+      <div class="panel-head"><h2 class="panel-title">Balance history</h2><span class="text-muted small">{% if chart %}After each of the last {{ chart.count }} transactions{% else %}Needs at least two transactions{% endif %}</span></div>
+      {% if chart %}<div class="chart-wrap pt-3">{{ balance_chart(chart) }}</div>
+      {% else %}<div class="chart-empty">Make a deposit, withdrawal or transfer and your balance trend will appear here.</div>{% endif %}
+    </section>
+  </div>
+  <div class="col-xl-4">
+    <section class="panel" aria-label="Quick actions">
+      <div class="panel-head"><h2 class="panel-title">Quick actions</h2></div>
+      <ul class="action-list">
+        <li><a href="{{ url_for('bank.withdraw', account_number=a) }}"><span class="chip">{{ icon('withdraw') }}</span><span><span class="t d-block">Withdraw</span><span class="s">Take money out</span></span><span class="go">{{ icon('chevron') }}</span></a></li>
+        <li><a href="{{ url_for('bank.account_interest', account_number=a) }}"><span class="chip">{{ icon('interest') }}</span><span><span class="t d-block">Account interest</span><span class="s">Preview and credit interest</span></span><span class="go">{{ icon('chevron') }}</span></a></li>
+        <li><a href="{{ url_for('bank.export', account_number=a) }}"><span class="chip">{{ icon('export') }}</span><span><span class="t d-block">Export statement</span><span class="s">CSV or PDF download</span></span><span class="go">{{ icon('chevron') }}</span></a></li>
+        <li><a href="{{ url_for('bank.interest_calculator') }}"><span class="chip">{{ icon('calculator') }}</span><span><span class="t d-block">Interest calculator</span><span class="s">Simple or compound estimate</span></span><span class="go">{{ icon('chevron') }}</span></a></li>
+      </ul>
+    </section>
+  </div>
+</div>
+
+<section class="panel mt-4" aria-label="Recent activity">
+  <div class="panel-head">
+    <h2 class="panel-title">Recent activity</h2>
+    <a class="btn btn-ghost btn-sm" href="{{ url_for('bank.transactions', account_number=a) }}">View all {{ count }} {{ icon('chevron') }}</a>
+  </div>
+  {{ txn_table(recent) }}
+</section>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% from "_macros.html" import head, csrf, idem, form_error, submit, icon with context %}
+{% block title %}Account interest{% endblock %}
+{% block content %}
+{% call head('Account interest', 'Preview interest, then credit it to the account. Previews never change your balance.') %}
+  <a class="btn btn-outline-secondary" href="{{ url_for('bank.interest_calculator') }}">{{ icon('calculator') }}What-if calculator</a>
+{% endcall %}
+{{ form_error(errors) }}
+<div class="row g-4">
+  <div class="col-lg-7">
+    <section class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">{% if account.account_type == 'FIXED_DEPOSIT' %}Maturity interest{% else %}Interest for a period{% endif %}</h2>
+        <span class="pill pill-warn">Estimate — not yet credited</span>
+      </div>
+      <div class="panel-body">
+        {% if account.account_type == 'FIXED_DEPOSIT' %}
+          <div class="balance-label">Estimated interest at maturity</div>
+          <div class="balance"><span class="cur">{{ cfg.CURRENCY_SYMBOL }}</span>{{ istatus.estimate|money|replace(cfg.CURRENCY_SYMBOL, '') }}</div>
+          <p class="text-muted mb-0">Principal {{ account.fd_principal|money }} · {{ account.fd_term_months }} months at {{ account.interest_rate }}% · matures {{ account.fd_maturity_date|dt }}.<br>Simplified FD model: Principal × Rate × Months ÷ 1200 (simple interest for the full term).</p>
+        {% elif istatus.kind == 'periodic' %}
+          <form method="get" class="row g-2 align-items-end mb-3">
+            <div class="col-auto"><label for="months" class="form-label">Months</label>
+              <input id="months" name="months" type="number" min="1" max="12" step="1" value="{{ months }}" class="form-control num{% if errors.get('months') %} is-invalid{% endif %}"></div>
+            <div class="col-auto"><button class="btn btn-outline-secondary" type="submit">Preview</button></div>
+          </form>
+          <div class="balance-label">Estimated interest</div>
+          <div class="balance"><span class="cur">{{ cfg.CURRENCY_SYMBOL }}</span>{{ istatus.estimate|money|replace(cfg.CURRENCY_SYMBOL, '') }}</div>
+          <p class="text-muted mb-0">{{ months }} month(s) of <strong>simple</strong> interest at {{ account.interest_rate }}% p.a. on the current balance of {{ account.balance|money }}. A simulated time step.</p>
+        {% else %}
+          <p class="mb-0 text-muted">{{ istatus.reason }}</p>
+        {% endif %}
+      </div>
+      {% if istatus.eligible %}
+      <form method="post" class="panel-foot d-flex flex-wrap align-items-center gap-3" data-confirm="Credit this interest to the account now?">
+        {{ csrf() }}{{ idem(none) }}<input type="hidden" name="months" value="{{ months }}">
+        {{ submit('Credit ' ~ (istatus.estimate|money) ~ ' interest') }}
+        <span class="small text-muted">Writes an “Interest credited” transaction and changes the balance.</span>
+      </form>
+      {% else %}
+      <div class="panel-foot"><div class="callout text-muted" role="status">{{ icon('info') }}<p>Interest cannot be credited: {{ istatus.reason }}</p></div></div>
+      {% endif %}
+    </section>
+  </div>
+  <div class="col-lg-5">
+    <section class="panel">
+      <div class="panel-head"><h2 class="panel-title">Interest rules · {{ rule.label }}</h2></div>
+      <div class="panel-body"><ul class="rule-list">{% for r in rule.rules %}<li>{{ r }}</li>{% endfor %}</ul></div>
+      <div class="panel-foot text-muted">Estimated and credited interest are different things: only the confirm button above changes a balance.</div>
+    </section>
+  </div>
+</div>
+{% endblock %}

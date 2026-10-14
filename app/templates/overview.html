@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% from "_macros.html" import head, status_pill, icon with context %}
+{% block title %}Account details{% endblock %}
+{% block content %}
+{% call head('Account details', 'Everything about this account and the rules that apply to it.') %}
+  <a class="btn btn-outline-secondary" href="{{ url_for('bank.settings', account_number=account.account_number) }}">{{ icon('settings') }}Settings</a>
+{% endcall %}
+<div class="row g-4">
+  <div class="col-lg-7">
+    <section class="panel">
+      <div class="panel-head"><h2 class="panel-title">Details</h2>{{ status_pill(account) }}</div>
+      <div class="kv-panel"><dl class="kv">
+        <dt>Account number</dt><dd class="mono">{{ account.account_number }}</dd>
+        <dt>Account holder</dt><dd>{{ account.holder_name }}</dd>
+        <dt>Account type</dt><dd>{{ rule.label }}</dd>
+        <dt>Opened on</dt><dd>{{ account.opened_at|dt }}</dd>
+        <dt>Status</dt><dd>{{ status_pill(account) }}{% if account.closed_at %} <span class="text-muted small ms-1">closed {{ account.closed_at|dt }}</span>{% endif %}</dd>
+        <dt>Current balance</dt><dd class="num fw-bold">{{ account.balance|money }}</dd>
+        {% if account.account_type != 'FIXED_DEPOSIT' %}
+          <dt>Interest rate</dt><dd>{% if account.interest_rate == '0.00' %}None (0%){% else %}{{ account.interest_rate }}% p.a., simple{% endif %}</dd>
+        {% else %}
+          <dt>FD principal</dt><dd class="num">{{ account.fd_principal|money }}</dd>
+          <dt>Term and rate</dt><dd>{{ account.fd_term_months }} months at {{ account.interest_rate }}% p.a.</dd>
+          <dt>Maturity date</dt><dd>{{ account.fd_maturity_date|dt }}</dd>
+          <dt>Maturity interest</dt><dd>{% if account.fd_interest_credited %}<span class="pill pill-pos">Credited</span>{% else %}<span class="pill pill-warn">Not yet credited</span>{% endif %}</dd>
+        {% endif %}
+      </dl></div>
+    </section>
+  </div>
+  <div class="col-lg-5">
+    <section class="panel">
+      <div class="panel-head"><h2 class="panel-title">Rules · {{ rule.label }}</h2></div>
+      <div class="panel-body"><ul class="rule-list">{% for r in rule.rules %}<li>{{ r }}</li>{% endfor %}</ul></div>
+      {% if istatus.kind %}<div class="panel-foot text-muted">Estimated interest is only a preview. It is <strong>credited</strong> only when you confirm on the <a href="{{ url_for('bank.account_interest', account_number=account.account_number) }}">Account interest</a> page.</div>{% endif %}
+    </section>
+  </div>
+</div>
+<p class="small text-muted mt-3 mb-0">Educational simulation: these rules are teaching models, not real bank products or regulations.</p>
+{% endblock %}

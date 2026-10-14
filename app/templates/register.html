@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf, field, money_field, pin_field, form_error, submit, flashes, icon with context %}
+{% block title %}Open an account{% endblock %}
+{% block chrome %}
+<div class="auth">
+  {% include "_auth_aside.html" %}
+  <div class="auth-main">
+    <main id="main" class="auth-card" tabindex="-1">
+      {{ flashes() }}
+      <h1 class="mb-1">Open a simulated account</h1>
+      <p class="text-muted mb-4">Educational simulation — do not reuse a PIN from anywhere else. A short numeric PIN is <strong>not</strong> sufficient protection for a real financial service.</p>
+      {{ form_error(errors) }}
+      <form method="post" novalidate>
+        {{ csrf() }}
+        <div class="form-section">
+          <h2>Account</h2>
+          {{ field('holder_name', 'Account holder name', errors, form.holder_name or '', autocomplete='name', extra='maxlength="60"') }}
+          <div class="mb-3">
+            <label for="account_type" class="form-label">Account type <span class="text-danger" aria-hidden="true">*</span></label>
+            <select class="form-select{% if errors.get('account_type') %} is-invalid{% endif %}" id="account_type" name="account_type" required aria-describedby="type-help">
+              {% for code, rule in type_rules.items() %}
+                <option value="{{ code }}" {{ 'selected' if form.account_type == code }}>{{ rule.label }}</option>
+              {% endfor %}
+            </select>
+            <div id="type-help" class="form-text">Rules for each type are listed below the form.</div>
+            {% if errors.get('account_type') %}<div class="invalid-feedback" role="alert">{{ errors['account_type'] }}</div>{% endif %}
+          </div>
+          <div class="mb-3" id="fd-term-group" data-show-for="FIXED_DEPOSIT">
+            <label for="fd_term_months" class="form-label">Fixed deposit term</label>
+            <select class="form-select{% if errors.get('fd_term_months') %} is-invalid{% endif %}" id="fd_term_months" name="fd_term_months">
+              {% for months, rate in cfg.FD_RATES.items() %}
+                <option value="{{ months }}" {{ 'selected' if form.fd_term_months == months|string }}>{{ months }} months — {{ rate }}% p.a.</option>
+              {% endfor %}
+            </select>
+            {% if errors.get('fd_term_months') %}<div class="invalid-feedback" role="alert">{{ errors['fd_term_months'] }}</div>{% endif %}
+          </div>
+          {{ money_field('opening_deposit', 'Opening deposit', errors, form.opening_deposit or '', 'Minimum depends on the account type. Up to 2 decimal places.') }}
+        </div>
+        <div class="form-section">
+          <h2>Security</h2>
+          <div class="row g-3">
+            <div class="col-sm-6">{{ pin_field('pin', 'PIN', errors, cfg.PIN_MIN_LENGTH ~ '–' ~ cfg.PIN_MAX_LENGTH ~ ' digits, no repeats or sequences.', new=true) }}</div>
+            <div class="col-sm-6">{{ pin_field('confirm_pin', 'Confirm PIN', errors, new=true) }}</div>
+          </div>
+        </div>
+        {{ submit('Open account', full=true) }}
+      </form>
+      <p class="mt-4 text-muted">Already registered? <a href="{{ url_for('bank.login') }}">Sign in</a></p>
+
+      <details class="panel mt-3">
+        <summary class="panel-head" role="button"><span class="panel-title">Account rules</span></summary>
+        <div class="panel-body pt-2">
+          {% for rule in type_rules.values() %}
+            <h3 class="h6 mt-2">{{ rule.label }}</h3>
+            <ul class="rule-list">{% for r in rule.rules %}<li>{{ r }}</li>{% endfor %}</ul>
+          {% endfor %}
+        </div>
+      </details>
+    </main>
+    <div class="auth-footer">
+      <p>Copyright © 2026 Pritam Rabha. All rights reserved.</p>
+      <p>BankSim — MCA Python Programming Project</p>
+      <p>Educational simulation · fictional money</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

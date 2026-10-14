@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% from "_macros.html" import head, csrf, field, pin_field, form_error, submit, icon with context %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+{% call head('Settings', 'Manage your PIN and your account.') %}{% endcall %}
+<div class="row g-4">
+  <div class="col-lg-6">
+    <section class="panel">
+      <div class="panel-head"><h2 class="panel-title">Change PIN</h2></div>
+      <form method="post" action="{{ url_for('bank.change_pin', account_number=account.account_number) }}" class="panel-body" novalidate>
+        {{ csrf() }}
+        {{ pin_field('current_pin', 'Current PIN', errors) }}
+        {{ pin_field('new_pin', 'New PIN', errors, cfg.PIN_MIN_LENGTH ~ '–' ~ cfg.PIN_MAX_LENGTH ~ ' digits, no repeats or sequences.', new=true) }}
+        {{ pin_field('confirm_pin', 'Confirm new PIN', errors, new=true) }}
+        {{ submit('Change PIN') }}
+      </form>
+      <div class="panel-foot text-muted">PINs are stored only as salted <code>scrypt</code> hashes and are never shown. This is an educational authentication simulation: a short numeric PIN would <strong>not</strong> be adequate on its own for a real internet-facing financial service.</div>
+    </section>
+  </div>
+  <div class="col-lg-6">
+    <section class="panel danger-zone">
+      <div class="panel-head"><h2 class="panel-title text-danger">Close account</h2></div>
+      <div class="panel-body">
+      {% if account.status != 'ACTIVE' %}
+        <p class="mb-0 text-muted">This account is already closed.</p>
+      {% else %}
+        <p class="small text-muted">Closing pays out any remaining balance (recorded as a withdrawal) and permanently blocks deposits, withdrawals, transfers and interest. History stays available.{% if account.account_type == 'FIXED_DEPOSIT' %} A fixed deposit can be closed only after maturity.{% endif %}</p>
+        {{ form_error(errors, '_close') }}
+        <form method="post" action="{{ url_for('bank.close_account', account_number=account.account_number) }}" data-confirm="Close this account permanently?" novalidate>
+          {{ csrf() }}
+          {{ field('confirm_text', 'Type CLOSE to confirm', errors, '', extra='autocapitalize="characters"') }}
+          {{ pin_field('pin', 'PIN', errors) }}
+          <button type="submit" class="btn btn-danger" data-once>Close account</button>
+        </form>
+      {% endif %}
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

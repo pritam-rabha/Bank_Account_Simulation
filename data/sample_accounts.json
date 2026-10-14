@@ -1,0 +1,100 @@
+{
+  "_note": "Fictional demo accounts for BankSim. PINs here are demo-only and are hashed (scrypt) when seeded; the data store never contains them.",
+  "accounts": [
+    {
+      "key": "aarav",
+      "holder_name": "Aarav Sharma",
+      "account_type": "SAVINGS",
+      "demo_pin": "482916",
+      "opening_deposit": "25000.00",
+      "opened_days_ago": 90,
+      "account_number": "102026000012",
+      "actions": [
+        {
+          "type": "deposit",
+          "amount": "5000.00",
+          "days_ago": 60,
+          "description": "Salary credit (demo)"
+        },
+        {
+          "type": "withdraw",
+          "amount": "1500.50",
+          "days_ago": 45,
+          "description": "ATM cash (demo)"
+        },
+        {
+          "type": "transfer",
+          "amount": "2000.00",
+          "days_ago": 30,
+          "to": "diya",
+          "description": "Rent share (demo)"
+        },
+        {
+          "type": "interest",
+          "months": 3,
+          "days_ago": 10
+        }
+      ]
+    },
+    {
+      "key": "diya",
+      "holder_name": "Diya Verma",
+      "account_type": "CURRENT",
+      "demo_pin": "7391",
+      "opening_deposit": "50000.00",
+      "opened_days_ago": 80,
+      "account_number": "202026000028",
+      "actions": [
+        {
+          "type": "deposit",
+          "amount": "12000.75",
+          "days_ago": 50,
+          "description": "Client payment (demo)"
+        },
+        {
+          "type": "withdraw",
+          "amount": "8000.00",
+          "days_ago": 20,
+          "description": "Supplier payment (demo)"
+        }
+      ]
+    },
+    {
+      "key": "kabir",
+      "holder_name": "Kabir Singh",
+      "account_type": "FIXED_DEPOSIT",
+      "demo_pin": "260854",
+      "opening_deposit": "100000.00",
+      "opened_days_ago": 400,
+      "fd_term_months": 12,
+      "account_number": "302026000034",
+      "actions": [
+        {
+          "type": "interest",
+          "days_ago": 30
+        }
+      ]
+    },
+    {
+      "key": "meera",
+      "holder_name": "Meera Das",
+      "account_type": "SAVINGS",
+      "demo_pin": "905137",
+      "opening_deposit": "1000.00",
+      "opened_days_ago": 70,
+      "account_number": "102026000046",
+      "actions": [
+        {
+          "type": "deposit",
+          "amount": "500.00",
+          "days_ago": 40,
+          "description": "Gift (demo)"
+        },
+        {
+          "type": "close",
+          "days_ago": 5
+        }
+      ]
+    }
+  ]
+}

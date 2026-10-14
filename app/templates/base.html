@@ -1,0 +1,98 @@
+{% from "_macros.html" import csrf, icon, flashes with context %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a1228">
+  <meta name="description" content="BankSim: an educational bank account simulation (Flask) built for an MCA Python Programming project.">
+  <title>{% block title %}BankSim{% endblock %} · BankSim</title>
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/svg+xml">
+  <link href="{{ url_for('static', filename='vendor/bootstrap/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+  <a class="visually-hidden-focusable skip-link" href="#main">Skip to main content</a>
+
+{% block chrome %}
+  {% if current_account %}
+  {% set a = current_account.account_number %}
+  {% set ep = request.endpoint %}
+  <div class="app">
+    <aside class="sidebar" id="sidebar" aria-label="Primary">
+      <a class="brand" href="{{ url_for('bank.dashboard') }}">
+        <span class="brand-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10 12 4l8 6M6 10v8m4-8v8m4-8v8m4-8v8M4 20h16"/></svg></span>
+        <span>BankSim</span>
+      </a>
+      <nav class="side-nav" aria-label="Account navigation">
+        <div class="side-label">Overview</div>
+        <a class="side-link {{ 'active' if ep == 'bank.dashboard' }}" href="{{ url_for('bank.dashboard') }}" {% if ep == 'bank.dashboard' %}aria-current="page"{% endif %}>{{ icon('dashboard') }}Dashboard</a>
+        <a class="side-link {{ 'active' if ep == 'bank.overview' }}" href="{{ url_for('bank.overview', account_number=a) }}" {% if ep == 'bank.overview' %}aria-current="page"{% endif %}>{{ icon('account') }}Account details</a>
+        <div class="side-label">Payments</div>
+        <a class="side-link {{ 'active' if ep == 'bank.deposit' }}" href="{{ url_for('bank.deposit', account_number=a) }}">{{ icon('deposit') }}Deposit</a>
+        <a class="side-link {{ 'active' if ep == 'bank.withdraw' }}" href="{{ url_for('bank.withdraw', account_number=a) }}">{{ icon('withdraw') }}Withdraw</a>
+        <a class="side-link {{ 'active' if ep in ('bank.transfer', 'bank.transfer_receipt') }}" href="{{ url_for('bank.transfer', account_number=a) }}">{{ icon('transfer') }}Fund transfer</a>
+        <div class="side-label">Records</div>
+        <a class="side-link {{ 'active' if ep == 'bank.transactions' }}" href="{{ url_for('bank.transactions', account_number=a) }}">{{ icon('history') }}Transactions</a>
+        <a class="side-link {{ 'active' if ep == 'bank.export' }}" href="{{ url_for('bank.export', account_number=a) }}">{{ icon('export') }}Export statement</a>
+        <div class="side-label">Tools</div>
+        <a class="side-link {{ 'active' if ep == 'bank.account_interest' }}" href="{{ url_for('bank.account_interest', account_number=a) }}">{{ icon('interest') }}Account interest</a>
+        <a class="side-link {{ 'active' if ep == 'bank.interest_calculator' }}" href="{{ url_for('bank.interest_calculator') }}">{{ icon('calculator') }}Interest calculator</a>
+        <div class="side-label">Manage</div>
+        <a class="side-link {{ 'active' if ep == 'bank.settings' }}" href="{{ url_for('bank.settings', account_number=a) }}">{{ icon('settings') }}Settings</a>
+      </nav>
+      <div class="side-user">
+        <div class="name">{{ current_account.holder_name }}</div>
+        <div class="meta">{{ type_rules[current_account.account_type].label }} · {{ a|mask }}</div>
+        <form method="post" action="{{ url_for('bank.logout') }}">{{ csrf() }}
+          <button class="btn btn-outline-secondary" type="submit">{{ icon('logout') }} Log out</button>
+        </form>
+      </div>
+    </aside>
+    <div class="scrim" data-nav-toggle></div>
+    <div class="app-main">
+      <header class="topbar">
+        <button class="icon-btn" type="button" data-nav-toggle aria-controls="sidebar" aria-expanded="false" aria-label="Open navigation">{{ icon('menu') }}</button>
+        <div class="crumbs"><strong>{{ type_rules[current_account.account_type].label }}</strong> · {{ a|mask }}</div>
+      </header>
+  {% else %}
+  <div class="public">
+    <header class="public-bar">
+      <div class="inner">
+        <a class="brand" href="{{ url_for('bank.home') }}">
+          <span class="brand-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10 12 4l8 6M6 10v8m4-8v8m4-8v8m4-8v8M4 20h16"/></svg></span>
+          <span>BankSim</span>
+        </a>
+        <nav class="public-links" aria-label="Site">
+          <a href="{{ url_for('bank.home') }}" class="{{ 'active' if request.endpoint == 'bank.home' }}">Overview</a>
+          <a href="{{ url_for('bank.interest_calculator') }}" class="{{ 'active' if request.endpoint == 'bank.interest_calculator' }}">Interest calculator</a>
+        </nav>
+        <div class="public-cta">
+          <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('bank.login') }}">PIN login</a>
+          <a class="btn btn-primary btn-sm" href="{{ url_for('bank.register') }}">Open account</a>
+        </div>
+      </div>
+    </header>
+    <div class="app-main">
+  {% endif %}
+      <main id="main" class="page" tabindex="-1">
+        {{ flashes() }}
+        {% block content %}{% endblock %}
+      </main>
+      <footer class="site-footer">
+        <div class="inner">
+          <div>
+            <p>Copyright © 2026 Pritam Rabha. All rights reserved.</p>
+            <p>BankSim — MCA Python Programming Project</p>
+          </div>
+          <p><a href="{{ url_for('bank.about') }}">About project</a> · Educational simulation · fictional money · not affiliated with any bank</p>
+        </div>
+      </footer>
+    </div>
+  </div>
+{% endblock %}
+
+  <script src="{{ url_for('static', filename='vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

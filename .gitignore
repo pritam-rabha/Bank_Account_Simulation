@@ -1,0 +1,26 @@
+# Environments and secrets
+.venv/
+venv/
+env/
+.env
+*.pem
+
+# Python caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Runtime data (created by the app; never commit ledgers)
+data/bank_data.json
+data/bank_data.json.bak
+data/bank_data.json.lock
+data/*.tmp
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.zip

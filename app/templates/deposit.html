@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% from "_macros.html" import head, csrf, idem, money_field, field, form_error, submit, icon with context %}
+{% block title %}Deposit{% endblock %}
+{% block content %}
+{% call head('Deposit', 'Add simulated money to this account.') %}{% endcall %}
+{% if account.status != 'ACTIVE' %}<div class="alert alert-warning callout" role="alert">{{ icon('alert') }}<p>This account is closed; no transactions are possible.</p></div>{% endif %}
+<div class="row g-4">
+  <div class="col-lg-7">
+    <section class="panel">
+      <div class="panel-body">
+        {{ form_error(errors) }}
+        <form method="post" novalidate>
+          {{ csrf() }}{{ idem(form) }}
+          {{ money_field('amount', 'Amount', errors, form.amount, 'Maximum ' ~ (cfg.MAX_TRANSACTION_AMOUNT|money) ~ ' per transaction, up to 2 decimal places.') }}
+          {{ field('description', 'Description (optional)', errors, form.description, required=false, extra='maxlength="60" placeholder="Cash deposit"') }}
+          <div class="d-flex gap-2 mt-4">{{ submit('Deposit funds') }}<a class="btn btn-outline-secondary" href="{{ url_for('bank.dashboard') }}">Cancel</a></div>
+        </form>
+      </div>
+    </section>
+  </div>
+  <div class="col-lg-5">{% set side_note = 'A deposit is recorded immediately in your transaction history.' %}{% include "_side_summary.html" %}</div>
+</div>
+{% endblock %}

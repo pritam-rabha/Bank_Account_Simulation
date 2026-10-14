@@ -1,0 +1,6 @@
+Flask>=3.0,<4.0
+gunicorn>=22.0
+# Time-zone database (needed on Windows for Asia/Kolkata display times)
+tzdata>=2024.1
+# Optional: enables PDF statement export. CSV export works without it.
+reportlab>=4.0

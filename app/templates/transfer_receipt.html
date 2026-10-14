@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% from "_macros.html" import head, icon with context %}
+{% block title %}Transfer confirmation{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-xl-7 col-lg-8">
+  <section class="panel receipt">
+    <div class="panel-body text-center pb-4">
+      <div class="receipt-check mx-auto mb-3">{{ icon('check', 'ico-lg') }}</div>
+      <h1 class="h4 mb-1">Transfer confirmed</h1>
+      <p class="text-muted mb-3">Your transfer was completed and recorded on both accounts.</p>
+      <div class="receipt-amount">{{ txn.amount|money }}</div>
+    </div>
+    <div class="receipt-tear"></div>
+    <div class="kv-panel"><dl class="kv">
+      <dt>Reference</dt><dd class="mono">{{ txn.reference }}</dd>
+      <dt>Debit transaction ID</dt><dd class="mono">{{ txn.transaction_id }}</dd>
+      <dt>From</dt><dd class="mono">{{ txn.account_number|mask }}</dd>
+      <dt>To</dt><dd class="mono">{{ txn.counterparty|mask }}</dd>
+      <dt>Date &amp; time</dt><dd>{{ txn.timestamp|dt }}</dd>
+      <dt>Note</dt><dd>{{ txn.description }}</dd>
+      <dt>Balance before</dt><dd class="num">{{ txn.previous_balance|money }}</dd>
+      <dt>Balance after</dt><dd class="num fw-bold">{{ txn.new_balance|money }}</dd>
+      <dt>Status</dt><dd><span class="pill pill-pos">{{ txn.status|title }}</span></dd>
+    </dl></div>
+    <div class="panel-foot d-flex flex-wrap gap-2">
+      <a class="btn btn-primary" href="{{ url_for('bank.dashboard') }}">Back to dashboard</a>
+      <a class="btn btn-outline-secondary" href="{{ url_for('bank.transactions', account_number=account.account_number) }}">View history</a>
+      <a class="btn btn-outline-secondary" href="{{ url_for('bank.transfer', account_number=account.account_number) }}">New transfer</a>
+    </div>
+  </section>
+  <p class="small text-muted mt-3">Simulated transfer between fictional accounts. The matching credit entry was recorded on the destination account with the same reference.</p>
+</div></div>
+{% endblock %}

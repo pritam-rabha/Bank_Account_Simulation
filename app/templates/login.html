@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf, field, pin_field, form_error, submit, flashes, icon with context %}
+{% block title %}PIN login{% endblock %}
+{% block chrome %}
+<div class="auth">
+  {% include "_auth_aside.html" %}
+  <div class="auth-main">
+    <main id="main" class="auth-card" tabindex="-1">
+      {{ flashes() }}
+      <h1 class="mb-1">Sign in</h1>
+      <p class="text-muted mb-4">Use your 12-digit account number and PIN. Repeated wrong PINs temporarily lock sign-in.</p>
+      {{ form_error(errors) }}
+      <form method="post" novalidate>
+        {{ csrf() }}
+        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+        {{ field('account_number', 'Account number', errors, form.account_number or '', inputmode='numeric', extra='maxlength="12" pattern="[0-9]{12}"', help='12 digits, shown on your account page.') }}
+        {{ pin_field('pin', 'PIN', errors) }}
+        {{ submit('Sign in', full=true) }}
+      </form>
+      <p class="mt-4 mb-0 text-muted">New here? <a href="{{ url_for('bank.register') }}">Open a demo account</a></p>
+
+      {% if cfg.SHOW_DEMO_CREDENTIALS %}
+      <details class="panel mt-4">
+        <summary class="panel-head" role="button"><span class="panel-title">Demo accounts (fictional)</span></summary>
+        <div class="panel-body pt-2">
+          <p class="small text-muted">Shown because this deployment enables sample credentials. Never publish credentials like these for a real service.</p>
+          <div class="table-scroll"><table class="spec-table">
+            <thead><tr><th scope="col">Holder</th><th scope="col">Account no.</th><th scope="col">PIN</th></tr></thead>
+            <tbody>
+              <tr><td>Aarav Sharma<br><span class="text-muted small">Savings</span></td><td class="mono">102026000012</td><td class="mono">482916</td></tr>
+              <tr><td>Diya Verma<br><span class="text-muted small">Current</span></td><td class="mono">202026000028</td><td class="mono">7391</td></tr>
+              <tr><td>Kabir Singh<br><span class="text-muted small">Fixed deposit (matured)</span></td><td class="mono">302026000034</td><td class="mono">260854</td></tr>
+              <tr><td>Meera Das<br><span class="text-muted small">Savings (closed)</span></td><td class="mono">102026000046</td><td class="mono">905137</td></tr>
+            </tbody></table></div>
+        </div>
+      </details>
+      {% endif %}
+    </main>
+    <div class="auth-footer">
+      <p>Copyright © 2026 Pritam Rabha. All rights reserved.</p>
+      <p>BankSim — MCA Python Programming Project</p>
+      <p>Educational simulation · fictional money</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

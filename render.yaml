@@ -1,0 +1,37 @@
+# Render Blueprint - https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: banksim
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn wsgi:app -c gunicorn.conf.py
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: BANKSIM_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PIN_PEPPER
+        generateValue: true
+      - key: TRUST_PROXY
+        value: "true"
+      - key: SESSION_COOKIE_SECURE
+        value: "true"
+      - key: SEED_SAMPLE_DATA
+        value: "true"
+      - key: SHOW_DEMO_CREDENTIALS
+        value: "true"
+      - key: DATA_FILE
+        value: data/bank_data.json
+    # The free plan has an EPHEMERAL filesystem: data resets on restart/redeploy
+    # (demo accounts are re-seeded). To keep data, use a paid plan, add a disk
+    # and point DATA_FILE at it:
+    #   disk:
+    #     name: banksim-data
+    #     mountPath: /var/data
+    #     sizeGB: 1
+    #   and set DATA_FILE=/var/data/bank_data.json

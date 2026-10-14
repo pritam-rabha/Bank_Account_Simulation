@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% from "_macros.html" import head, field, form_error, icon with context %}
+{% block title %}Interest calculator{% endblock %}
+{% block content %}
+{% call head('Interest calculator', 'Work out estimated interest for any principal, rate and period. This is a calculator only — it never changes an account balance.') %}{% endcall %}
+<div class="row g-4">
+  <div class="col-lg-5">
+    <section class="panel">
+      <div class="panel-head"><h2 class="panel-title">Inputs</h2></div>
+      <div class="panel-body">
+        {{ form_error(errors) }}
+        <form method="get" novalidate>
+          <input type="hidden" name="calculate" value="1">
+          <div class="mb-3">
+            <label for="principal" class="form-label">Principal <span class="text-danger" aria-hidden="true">*</span></label>
+            <div class="input-group"><span class="input-group-text" aria-hidden="true">{{ cfg.CURRENCY_SYMBOL }}</span>
+              <input id="principal" name="principal" class="form-control num{% if errors.get('principal') %} is-invalid{% endif %}" value="{{ form.principal }}" inputmode="decimal" autocomplete="off" required placeholder="10000" data-money aria-describedby="principal-help{% if errors.get('principal') %} principal-error{% endif %}"></div>
+            <div id="principal-help" class="form-text">Up to 1,00,00,00,000.00</div>
+            {% if errors.get('principal') %}<div id="principal-error" class="invalid-feedback" role="alert">{{ errors['principal'] }}</div>{% endif %}
+          </div>
+          <div class="mb-3">
+            <label for="rate" class="form-label">Annual interest rate <span class="text-danger" aria-hidden="true">*</span></label>
+            <div class="input-group">
+              <input id="rate" name="rate" class="form-control num{% if errors.get('rate') %} is-invalid{% endif %}" value="{{ form.rate }}" inputmode="decimal" autocomplete="off" required placeholder="8" aria-describedby="rate-help{% if errors.get('rate') %} rate-error{% endif %}">
+              <span class="input-group-text" aria-hidden="true">% p.a.</span></div>
+            <div id="rate-help" class="form-text">0 to 100, up to 4 decimal places</div>
+            {% if errors.get('rate') %}<div id="rate-error" class="invalid-feedback" role="alert">{{ errors['rate'] }}</div>{% endif %}
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-7">
+              <label for="time_value" class="form-label">Time period <span class="text-danger" aria-hidden="true">*</span></label>
+              <input id="time_value" name="time_value" class="form-control num{% if errors.get('time_value') %} is-invalid{% endif %}" value="{{ form.time_value }}" inputmode="decimal" autocomplete="off" required placeholder="2" aria-describedby="time-help{% if errors.get('time_value') %} time_value-error{% endif %}">
+            </div>
+            <div class="col-5">
+              <label for="time_unit" class="form-label">Unit</label>
+              <select id="time_unit" name="time_unit" class="form-select">
+                <option value="years" {{ 'selected' if form.time_unit != 'months' }}>Years</option>
+                <option value="months" {{ 'selected' if form.time_unit == 'months' }}>Months</option>
+              </select>
+            </div>
+            <div class="col-12"><div id="time-help" class="form-text mt-0">Up to 100 years, 2 decimal places</div>
+              {% if errors.get('time_value') %}<div id="time_value-error" class="invalid-feedback" role="alert">{{ errors['time_value'] }}</div>{% endif %}</div>
+          </div>
+          <fieldset class="mb-3">
+            <legend class="form-label">Method</legend>
+            <div class="segmented" role="radiogroup">
+              <input type="radio" name="method" id="m-simple" value="simple" {{ 'checked' if form.method != 'compound' }}><label for="m-simple">Simple</label>
+              <input type="radio" name="method" id="m-compound" value="compound" {{ 'checked' if form.method == 'compound' }}><label for="m-compound">Compound</label>
+            </div>
+          </fieldset>
+          <div class="mb-4" id="compounding-group">
+            <label for="compounding" class="form-label">Compounding frequency</label>
+            <select id="compounding" name="compounding" class="form-select{% if errors.get('compounding') %} is-invalid{% endif %}">
+              {% for n, label in compounding.items() %}<option value="{{ n }}" {{ 'selected' if form.compounding == n|string }}>{{ label }} ({{ n }}× per year)</option>{% endfor %}
+            </select>
+            {% if errors.get('compounding') %}<div class="invalid-feedback" role="alert">{{ errors['compounding'] }}</div>{% endif %}
+          </div>
+          <button class="btn btn-primary w-100" type="submit">Calculate estimate</button>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <div class="col-lg-7">
+    {% if result %}
+    <section class="panel" aria-live="polite">
+      <div class="panel-head"><h2 class="panel-title">Estimated result</h2><span class="pill pill-warn">Estimate — not credited</span></div>
+      <div class="panel-body pb-3">
+        <div class="balance-label">Estimated interest</div>
+        <div class="balance amount-pos"><span class="cur">{{ cfg.CURRENCY_SYMBOL }}</span>{{ result.interest|money|replace(cfg.CURRENCY_SYMBOL, '') }}</div>
+        <div class="balance-meta">
+          <span>Principal <strong class="text-body">{{ result.principal|money }}</strong></span>
+          <span>Estimated total <strong class="text-body">{{ result.maturity|money }}</strong></span>
+        </div>
+      </div>
+      <div class="kv-panel border-top"><dl class="kv">
+        <dt>Method</dt><dd>{{ result.method_label }}{% if result.compounds_per_year %} · {{ compounding[result.compounds_per_year]|lower }} (n = {{ result.compounds_per_year }}){% endif %}</dd>
+        <dt>Inputs</dt><dd>P = {{ result.principal|money }}, R = {{ result.rate }}%, T = {{ result.years }} years</dd>
+        <dt>Formula</dt><dd><code>{{ result.formula }}</code></dd>
+      </dl></div>
+      {% if result.schedule %}
+      <div class="panel-head border-top"><h3 class="panel-title">Year by year</h3></div>
+      <div class="table-scroll"><table class="ledger">
+        <thead><tr><th scope="col">Period</th><th scope="col" class="r">Interest this period</th><th scope="col" class="r">Interest to date</th><th scope="col" class="r">Balance</th></tr></thead>
+        <tbody>{% for row in result.schedule %}<tr><td>{{ row.label }}</td><td class="prev">{{ row.interest_this_period|money }}</td><td class="prev">{{ row.interest_to_date|money }}</td><td class="bal">{{ row.balance|money }}</td></tr>{% endfor %}</tbody>
+      </table></div>
+      {% endif %}
+    </section>
+    {% endif %}
+    <section class="panel{{ ' mt-4' if result }}">
+      <div class="panel-head"><h2 class="panel-title">How it works</h2></div>
+      <div class="panel-body">
+        <ul class="rule-list">
+          <li><strong>Simple:</strong> <code>I = P × R × T ÷ 100</code>. Interest is always on the original principal.</li>
+          <li><strong>Compound:</strong> <code>A = P × (1 + R ÷ (100·n))^(n·T)</code>, <code>I = A − P</code>. Interest earns interest.</li>
+          <li><em>P</em> principal, <em>R</em> annual rate %, <em>T</em> years (months ÷ 12), <em>n</em> compounding periods per year.</li>
+        </ul>
+        <h3 class="h6 mt-3">Assumptions &amp; limitations</h3>
+        <ul class="rule-list">
+          <li>Educational model; not any real bank’s method or day-count convention. A year is 12 equal months.</li>
+          <li>Constant rate for the whole period; no tax, fees or penalties.</li>
+          <li>Calculated with Python <code>Decimal</code>; only the final figure is rounded (half-up) to 0.01.</li>
+          <li>Partial compounding periods use a fractional exponent — a modelling simplification.</li>
+          <li>An estimate is not a credit. Interest is added to an account only from the account’s Interest page, and then appears as an “Interest credited” transaction.</li>
+        </ul>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}
