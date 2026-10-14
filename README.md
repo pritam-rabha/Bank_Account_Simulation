@@ -12,6 +12,17 @@ A Flask web application that simulates savings, current and fixed-deposit accoun
 > BankSim is an educational simulation that uses fictional money. Do not enter real banking credentials or connect real financial accounts.
 
 
+## Author and academic details
+
+| Field | Details |
+|---|---|
+| Application | BankSim — Bank Account Simulation |
+| Author | Pritam Rabha |
+| Programme | MCA, 3rd Semester |
+| Course | Python Programming |
+| Project guide | Dr. Pangambam Sendash Singh |
+| Institution | Dr. Hari Singh Gour Vishwavidyalaya, Sagar, Madhya Pradesh |
+
 ## Contents
 
 1. [Live demo](#live-demo)
@@ -36,18 +47,6 @@ A Flask web application that simulates savings, current and fixed-deposit accoun
 20. [Security considerations](#security-considerations-summary)
 21. [Troubleshooting](#troubleshooting)
 22. [Future improvements](#future-improvements)
-
-## Author and academic details
-
-| | |
-|---|---|
-| Application | BankSim — Bank Account Simulation |
-| Author | Pritam Rabha |
-| Programme | MCA, 3rd Semester |
-| Course | Python Programming |
-| Project guide | Dr. Pangambam Sendash Singh |
-| Institution | Dr. Hari Singh Gour Vishwavidyalaya, Sagar, Madhya Pradesh |
-
 
 ## Problem statement and objectives
 
