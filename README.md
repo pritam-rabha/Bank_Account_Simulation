@@ -1,6 +1,5 @@
 # BankSim — Bank Account Simulation
 
-> **Educational simulation.** BankSim uses fictional money. It is **not** a real bank, implements no real banking product or regulation, is not affiliated with any bank, and must never be connected to real accounts or payment services.
 
 A Flask web application that simulates savings, current and fixed-deposit accounts with a timestamped ledger, an interest calculator, PIN-based login, atomic fund transfers and statement export.
 
