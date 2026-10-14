@@ -4,6 +4,39 @@
 
 A Flask web application that simulates savings, current and fixed-deposit accounts with a timestamped ledger, an interest calculator, PIN-based login, atomic fund transfers and statement export.
 
+
+## Live demo
+
+**Try BankSim:** [https://banksim-5hmn.onrender.com/](https://banksim-5hmn.onrender.com/)
+
+> BankSim is an educational simulation that uses fictional money. Do not enter real banking credentials or connect real financial accounts.
+
+
+## Contents
+
+1. [Live demo](#live-demo)
+2. [Author and academic details](#author-and-academic-details)
+3. [Problem statement and objectives](#problem-statement-and-objectives)
+4. [Features](#features-the-six-assignment-requirements)
+5. [Technology stack](#technology-stack)
+6. [Project structure](#project-structure)
+7. [Installation](#installation)
+8. [Demo accounts](#demo-accounts-fictional-when-seed_sample_datatrue)
+9. [PIN configuration and security](#pin-configuration-and-security)
+10. [Account-type rules](#account-type-rules-simulated)
+11. [Interest formulas and assumptions](#interest-formulas-and-assumptions)
+12. [Transfer processing](#transfer-processing)
+13. [Transaction export](#transaction-export)
+14. [User interface](#user-interface)
+15. [Testing](#testing)
+16. [GitHub](#github)
+17. [Render deployment](#render-deployment)
+18. [Credits and copyright](#credits-and-copyright)
+19. [Data persistence limitations](#data-persistence-limitations-json-storage)
+20. [Security considerations](#security-considerations-summary)
+21. [Troubleshooting](#troubleshooting)
+22. [Future improvements](#future-improvements)
+
 ## Author and academic details
 
 | | |
@@ -15,7 +48,6 @@ A Flask web application that simulates savings, current and fixed-deposit accoun
 | Project guide | Dr. Pangambam Sendash Singh |
 | Institution | Dr. Hari Singh Gour Vishwavidyalaya, Sagar, Madhya Pradesh |
 
-Copyright © 2026 Pritam Rabha. All rights reserved.
 
 ## Problem statement and objectives
 
@@ -64,12 +96,19 @@ Bank_Account_Simulation/
 ├── docs/screenshots/          # UI screenshots (desktop + mobile)
 ├── run.py                   # dev server
 ├── wsgi.py                  # production entry point
-├── gunicorn.conf.py  render.yaml  pytest.ini
-├── requirements.txt  requirements-dev.txt
-└── .env.example  .gitignore  README.md
+├── gunicorn.conf.py
+├── render.yaml
+├── pytest.ini
+├── requirements.txt
+├── requirements-dev.txt
+├── .env.example
+├── .gitignore
+└── README.md
 ```
 
-## Installation — Ubuntu
+## Installation
+
+### Ubuntu / Linux
 
 ```bash
 sudo apt update && sudo apt install -y python3 python3-venv python3-pip git
@@ -84,7 +123,7 @@ python run.py                                              # http://127.0.0.1:50
 
 Production-style run (Linux/macOS): `SECRET_KEY=$(python -c "import secrets;print(secrets.token_hex(32))") gunicorn wsgi:app -c gunicorn.conf.py` (listens on port 8000).
 
-## Installation — Windows (PowerShell)
+### Windows (PowerShell)
 
 ```powershell
 cd Bank_Account_Simulation
@@ -241,3 +280,15 @@ Educational model only. No rate limiting on registration; no email/MFA/recovery 
 ## Future improvements
 
 Migrate to PostgreSQL/SQLite with SQLAlchemy; real multi-factor and passkey login; account-holder profiles with several accounts per login; scheduled interest posting; standing instructions; admin/audit role; rate limiting on registration; i18n; richer charts; PDF with a proper Unicode font (₹).
+
+## Credits and copyright
+
+**Project:** BankSim — Bank Account Simulation  
+**Developer and author:** Pritam Rabha  
+**Academic context:** MCA, 3rd Semester — Python Programming  
+**Institution:** Dr. Hari Singh Gour Vishwavidyalaya, Sagar, Madhya Pradesh  
+**Live demo:** [https://banksim-5hmn.onrender.com/](https://banksim-5hmn.onrender.com/)
+
+Copyright © 2026 Pritam Rabha. All rights reserved.
+
+This project was created for educational and academic purposes. The application simulates banking operations using fictional data and is not a real banking service. Please refer to the security and educational-use notices above before using the live demo.
